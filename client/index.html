@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="/static/angular/angular.js"></script>
+        <script src="/static/angular-material/angular-material.js"></script>
+        <script src="/static/angular-aria/angular-aria.js"></script>
+        <script src="/static/angular-animate/angular-animate.js"></script>
+        <script src="/static/angular-messages/angular-messages.js"></script>
+        <script src="/app/app.js"></script>
+    </head>
+    <body ng-app="test.app">
+
+        <form test-app-form ng-submit="form.submit(testform)" name="testform">
+
+            <pre>{{ testform | json:4 }}</pre>
+            <pre>{{ testform.email | json:4 }}</pre>
+
+            <div>
+                <label for="username">
+                    Email
+                </label>
+                <input type="email"
+                    name="email"
+                    required
+                    ng-model="form.username"
+                    id="username">
+
+            </div>
+
+            <div>
+                <input type="submit" value="go">
+            </div>
+
+        </form>
+
+        <form name="dinglesForm">
+
+            <md-input-container>
+                <label>Dingles</label>
+                <input required name="dongles" ng-model="dongles">
+                <div ng-messages="dinglesForm.dongles.$error">
+                    <div ng-message="required">This is required</div>
+                </div>
+            </md-input-container>
+
+        </form>
+
+    </body>
+</html>

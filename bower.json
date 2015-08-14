@@ -1,0 +1,21 @@
+{
+  "name": "klm-forms",
+  "version": "0.1.0-alpha",
+  "authors": [
+    "Gregory Cowan <g.cowan@amnzero.nl>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angularjs": "1.4",
+    "angular-material": "~0.10.1",
+    "angular-messages": "~1.4.4"
+  }
+}
