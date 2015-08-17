@@ -12,7 +12,7 @@
                 controller: Controller
             };
 
-            function Controller () {
+            function Controller ($timeout) {
 
                 var self = this;
 
@@ -20,7 +20,33 @@
 
                 function submit (form) {
 
+                    console.log('submitting');
                     console.log(form);
+                    if (!form.$valid) {
+
+                        $timeout(function () {
+
+                            document.getElementById('errors').focus();
+
+                            var elementList = document.querySelectorAll('#errors a');
+
+                            Object.keys(elementList).forEach(function (elKey) {
+
+                                var el = elementList[elKey];
+
+                                el.addEventListener('click', function (e) {
+
+                                    e.preventDefault();
+                                    document.getElementById(el.getAttribute('data-element-id')).focus();
+
+                                });
+
+                            });
+
+                        });
+
+
+                    }
                     return false;
 
                 }

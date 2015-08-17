@@ -7,41 +7,81 @@
         <script src="/static/angular-animate/angular-animate.js"></script>
         <script src="/static/angular-messages/angular-messages.js"></script>
         <script src="/app/app.js"></script>
+
+        <style>
+            .element-invisible {
+                position: absolute !important;
+                clip: rect(1px 1px 1px 1px);
+                clip: rect(1px, 1px, 1px, 1px);
+            }
+        </style>
     </head>
     <body ng-app="test.app">
 
-        <form test-app-form ng-submit="form.submit(testform)" name="testform">
+        <div aria-hidden="true">
+            <em>This content has aria-hidden</em>
+            <p>What should we notice on this page:</p>
+            <ul>
+                <li>Frontend validation errors are communicated instantly</li>
+                <li>On submit an overview of all form errors should be spoken but not shown</li>
+                <li>The list of form errors should not be focusable for non-disabled users</li>
+                <li>The list of form errors should be focusable for disabled users</li>
+                <li>The list of form errors should navigate to the form field on click</li>
+            </ul>
+            <p>To do:</p>
+            <ul>
+                <li>Errors that cannot be validated on the frontend should be non-blocking for a submission</li>
+            </ul>
+        </div>
 
-            <pre>{{ testform | json:4 }}</pre>
-            <pre>{{ testform.email | json:4 }}</pre>
+        <form test-app-form name="dinglesForm" ng-submit="form.submit(dinglesForm)" novalidate>
 
-            <div>
-                <label for="username">
-                    Email
-                </label>
-                <input type="email"
-                    name="email"
-                    required
-                    ng-model="form.username"
-                    id="username">
+            <!-- top errorrs -->
+            <div aria-live="assertive" id="errors">
+                <div ng-show="dinglesForm.$submitted && !dinglesForm.$valid" style="color: red;" >
+                    <div>Please correct the fields marked as invalid</div>
 
-            </div>
+                    <ul class="element-invisible">
+                        <li ng-repeat="(key, errors) in dinglesForm.$error track by $index">
+                            {{ key }} errors
+                            <ul>
+                                <li ng-repeat="e in errors">
+                                    <a data-element-id="{{ e.$name }}" href="#{{ e.$name }}">{{ e.$name }} has an error: {{ key }}</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
 
-            <div>
-                <input type="submit" value="go">
-            </div>
-
-        </form>
-
-        <form name="dinglesForm">
-
-            <md-input-container>
-                <label>Dingles</label>
-                <input required name="dongles" ng-model="dongles">
-                <div ng-messages="dinglesForm.dongles.$error">
-                    <div ng-message="required">This is required</div>
                 </div>
-            </md-input-container>
+            </div>
+
+
+
+
+            <div>
+                <md-input-container>
+                    <label>Dingles</label>
+                    <input type="email" required name="dongles" ng-model="dongles" id="dongles" aria-describedby="msg">
+                    <div ng-messages="dinglesForm.dongles.$error" id="msg" aria-live="assertive">
+                        <div ng-message="required">This is required</div>
+                        <div ng-message="email">Please fill in a valid email address</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div>
+                <md-input-container>
+                    <label>Dingles</label>
+                    <input type="email" required name="djongles" ng-model="djongles" id="djongles" aria-describedby="msgdeux">
+                    <div ng-messages="dinglesForm.djongles.$error" id="msgdeux" aria-live="assertive">
+                        <div ng-message="required">This is required</div>
+                        <div ng-message="email">Please fill in a valid email address</div>
+                    </div>
+                </md-input-container>
+            </div>
+
+            <div>
+                <input type="submit" value="submit">
+            </div>
 
         </form>
 
