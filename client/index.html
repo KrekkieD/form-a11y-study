@@ -8,82 +8,306 @@
         <script src="/static/angular-messages/angular-messages.js"></script>
         <script src="/app/app.js"></script>
 
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
         <style>
-            .element-invisible {
-                position: absolute !important;
-                clip: rect(1px 1px 1px 1px);
-                clip: rect(1px, 1px, 1px, 1px);
+
+            [ng-messages] {
+                color: red;
             }
+
+            label {
+                display: inline-block;
+                min-width: 150px;
+            }
+            fieldset > div {
+                padding: .5em;
+            }
+            body:not(.accessibility-enabled) .accessibility-content {
+                display: none !important;
+            }
+
         </style>
     </head>
     <body ng-app="test.app">
 
-        <div aria-hidden="true">
-            <em>This content has aria-hidden</em>
-            <p>What should we notice on this page:</p>
-            <ul>
-                <li>Frontend validation errors are communicated instantly</li>
-                <li>On submit an overview of all form errors should be spoken but not shown</li>
-                <li>The list of form errors should not be focusable for non-disabled users</li>
-                <li>The list of form errors should be focusable for disabled users</li>
-                <li>The list of form errors should navigate to the form field on click</li>
-            </ul>
-            <p>To do:</p>
-            <ul>
-                <li>Errors that cannot be validated on the frontend should be non-blocking for a submission</li>
-            </ul>
-        </div>
+        <a href="#" id="enableaccessibility" aria-label="Click to improve accessibility for screen readers">
+            <span aria-hidden="true" class="fa fa-wheelchair"></span>
+        </a>
 
-        <form test-app-form name="dinglesForm" ng-submit="form.submit(dinglesForm)" novalidate>
+        <strong class="accessibility-content">Accessibility mode enabled</strong>
 
-            <!-- top errorrs -->
-            <div aria-live="assertive" id="errors">
-                <div ng-show="dinglesForm.$submitted && !dinglesForm.$valid" style="color: red;" >
-                    <div>Please correct the fields marked as invalid</div>
+        <div ng-include="'/overview.html'"></div>
 
-                    <ul class="element-invisible">
-                        <li ng-repeat="(key, errors) in dinglesForm.$error track by $index">
-                            {{ key }} errors
-                            <ul>
-                                <li ng-repeat="e in errors">
-                                    <a data-element-id="{{ e.$name }}" href="#{{ e.$name }}">{{ e.$name }} has an error: {{ key }}</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+        <form test-app-form name="formStudy" ng-submit="form.submit(formStudy)" novalidate>
+
+            <!-- top errors -->
+            <div id="errors" tabindex="-1">
+                <div ng-show="formStudy.$submitted && !formStudy.$valid" style="color: red;">
+
+                    <div ng-messages="formStudy.$error" aria-live="polite">
+                        <div ng-message="internalservererror">
+                            <span aria-hidden="true" class="fa fa-exclamation-circle"></span>
+                            Something went wrong. Please try again or contact the customer service.
+                        </div>
+                        <div ng-message="accounttoosimilar">
+                            <span aria-hidden="true" class="fa fa-exclamation-circle"></span>
+                            There appears to be an identical account using these details. Are you sure you
+                            haven't registered before? If so, please confirm your details and try again.
+                        </div>
+                        <div ng-message="email,emailinuse,required,minlength,pattern,maxlength,phonenotrecognized,addressnotrecognized">
+                            <p>
+                                <span aria-hidden="true" class="fa fa-exclamation-circle"></span>
+                                Please correct the fields marked as invalid
+                            </p>
+                            <a tabindex="0"
+                                href="#"
+                                ng-click="form.setTabIndex()">
+
+                                Click to focus on errors
+                            </a>
+                        </div>
+                    </div>
 
                 </div>
             </div>
 
+            <fieldset>
+                <legend>Basic fields</legend>
+
+                <div>
+
+                    <label id="emailLabel">email</label>
+                    <input type="email"
+                        required
+                        name="email"
+                        emailinuse
+                        ng-model="form.model.email"
+                        id="email"
+                        tabindex="0"
+                        aria-labeledby="emailLabel emailErrorLabel">
 
 
+                    <div ng-show="formStudy.$submitted || formStudy.email.$dirty"
+                        ng-messages="formStudy.email.$error"
+                        id="emailErrorLabel"
+                        aria-live="assertive">
 
-            <div>
-                <md-input-container>
-                    <label>Dingles</label>
-                    <input type="email" required name="dongles" ng-model="dongles" id="dongles" aria-describedby="msg">
-                    <div ng-messages="dinglesForm.dongles.$error" id="msg" aria-live="assertive">
+                        <div ng-message="emailinuse">This email is already in use</div>
                         <div ng-message="required">This is required</div>
                         <div ng-message="email">Please fill in a valid email address</div>
                     </div>
-                </md-input-container>
-            </div>
-            <div>
-                <md-input-container>
-                    <label>Dingles</label>
-                    <input type="email" required name="djongles" ng-model="djongles" id="djongles" aria-describedby="msgdeux">
-                    <div ng-messages="dinglesForm.djongles.$error" id="msgdeux" aria-live="assertive">
-                        <div ng-message="required">This is required</div>
-                        <div ng-message="email">Please fill in a valid email address</div>
-                    </div>
-                </md-input-container>
-            </div>
+                </div>
 
-            <div>
-                <input type="submit" value="submit">
-            </div>
+
+                <div>
+                    <label id="passwordLabel">password</label>
+                    <input type="password"
+                        required
+                        name="password"
+                        minlength="6"
+                        ng-pattern="/[^a-zA-Z]+/"
+                        ng-model="form.model.password"
+                        id="password"
+                        tabindex="0"
+                        aria-labeledby="passwordLabel passwordErrorLabel">
+
+                    <div ng-show="formStudy.$submitted || formStudy.password.$dirty"
+                        ng-messages="formStudy.password.$error"
+                        id="passwordErrorLabel"
+                        aria-live="assertive">
+
+                        <div ng-message="required">This is required</div>
+                        <div ng-message="minlength">Please use a password of at least 6 characters</div>
+                        <div ng-message="pattern">Please use at least one character that is not a-z</div>
+                    </div>
+                </div>
+
+            </fieldset>
+            <fieldset ng-form="phone">
+                <legend>Phone details</legend>
+
+                <div tabindex="-1"
+                    ng-if="formStudy.$submitted && !formStudy.phone.$valid" style="color: red;"
+                    ng-messages="formStudy.phone.$error">
+
+                    <p ng-message="phonenotrecognized">
+                        <span aria-hidden="true" class="fa fa-exclamation-circle"></span>
+                        We were unable to recognize your phone details. Please confirm your details or try again.
+                    </p>
+                </div>
+
+                <div>
+                    <label id="phoneCountryLabel">country prefix</label>
+                    <input type="text"
+                        ng-pattern="/[0-9]+/"
+                        required
+                        name="phonePrefix"
+                        id="phonePrefix"
+                        ng-model="form.model.phone.prefix"
+                        tabindex="0"
+                        aria-labeledby="phoneCountryLabel phoneCountryErrorLabel">
+
+                    <div ng-show="formStudy.$submitted || formStudy.phone.phonePrefix.$dirty"
+                        ng-messages="formStudy.phone.phonePrefix.$error"
+                        id="phoneCountryErrorLabel"
+                        aria-live="assertive">
+
+                        <div ng-message="required">This is required</div>
+                        <div ng-message="pattern">Please enter only numbers</div>
+                    </div>
+                </div>
+
+
+                <div>
+                    <label id="phoneNumberLabel">number</label>
+                    <input type="text"
+                        ng-pattern="/[0-9]+/"
+                        required
+                        name="phoneNumber"
+                        id="phoneNumber"
+                        ng-model="form.model.phone.number"
+                        tabindex="0"
+                        aria-labeledby="phoneNumberLabel phoneNumberErrorLabel">
+
+                    <div ng-show="formStudy.$submitted || formStudy.phone.phoneNumber.$dirty"
+                        ng-messages="formStudy.phone.phoneNumber.$error"
+                        id="phoneNumberErrorLabel"
+                        aria-live="assertive">
+
+                        <div ng-message="required">This is required</div>
+                        <div ng-message="pattern">Please enter only numbers</div>
+                    </div>
+                </div>
+
+
+            </fieldset>
+            <fieldset ng-form="address">
+                <legend>Address details</legend>
+
+                <div tabindex="-1"
+                    ng-if="formStudy.$submitted && !formStudy.address.$valid" style="color: red;"
+                    ng-messages="formStudy.address.$error">
+
+                    <p ng-message="addressnotrecognized">
+                        <span aria-hidden="true" class="fa fa-exclamation-circle"></span>
+                        We were unable to recognize your address. Please confirm your details or try again.
+                    </p>
+                </div>
+
+                <div>
+                    <label id="addressCountryCodeLabel">country code</label>
+                    <input type="text"
+                        ng-pattern="/[a-z]{2}/"
+                        maxlength="2"
+                        required
+                        name="addressCountryCode"
+                        id="addressCountryCode"
+                        ng-model="form.model.address.countryCode"
+                        tabindex="0"
+                        aria-labeledby="addressCountryCodeLabel addressCountryCodeErrorLabel">
+
+                    <div ng-show="formStudy.$submitted || formStudy.address.addressCountryCode.$dirty"
+                        ng-messages="formStudy.address.addressCountryCode.$error"
+                        id="addressCountryCodeErrorLabel"
+                        aria-live="assertive">
+
+                        <div ng-message="required">This is required</div>
+                        <div ng-message="pattern, maxlength">Please enter the 2 characters of your country code</div>
+                    </div>
+                </div>
+
+                <div>
+                    <label id="addressStreetLabel">street</label>
+                    <input type="text"
+                        required
+                        name="addressStreet"
+                        id="addressStreet"
+                        ng-model="form.model.address.street"
+                        tabindex="0"
+                        aria-labeledby="addressStreetLabel addressStreetErrorLabel">
+
+                    <div ng-show="formStudy.$submitted || formStudy.address.addressStreet.$dirty"
+                        ng-messages="formStudy.address.addressStreet.$error"
+                        id="addressStreetErrorLabel"
+                        aria-live="assertive">
+
+                        <div ng-message="required">This is required</div>
+                    </div>
+                </div>
+
+                <div>
+                    <label id="addressCityLabel">city</label>
+                    <input type="text"
+                        required
+                        name="addressCity"
+                        id="addressCity"
+                        ng-model="form.model.address.city"
+                        tabindex="0"
+                        aria-labeledby="addressCityLabel addressCityErrorLabel">
+
+                    <div ng-show="formStudy.$submitted || formStudy.address.addressCity.$dirty"
+                        ng-messages="formStudy.address.addressCity.$error"
+                        id="addressCityErrorLabel"
+                        aria-live="assertive">
+
+                        <div ng-message="required">This is required</div>
+                    </div>
+                </div>
+
+            </fieldset>
+            <fieldset>
+                <legend>Trigger backend errors</legend>
+
+                <ul>
+                    <li>
+                        <label>
+                            <input type="checkbox" ng-model="form.model.error.internalservererror">
+                            backend internal server error (ignores other errors)
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" ng-model="form.model.error.accounttoosimilar">
+                            backend account too similar (ignores other errors)
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" ng-model="form.model.error.emailinuse">
+                            backend email in use error
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" ng-model="form.model.error.phonenotrecognized">
+                            backend phone not recognized error
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" ng-model="form.model.error.addressnotrecognized">
+                            backend address not recognized error
+                        </label>
+                    </li>
+                </ul>
+
+                <div>
+                    <input tabindex="0" type="submit" value="submit">
+                </div>
+
+            </fieldset>
 
         </form>
+
+        <pre>Preview of model obj:<br>{{ form.model | json:4 }}</pre>
+
+        <script>
+            document.getElementById('enableaccessibility').addEventListener('click', function () {
+                document.querySelector('body').className = document.querySelector('body').className + ' accessibility-enabled';
+                document.getElementById('enableaccessibility').parentNode.removeChild(document.getElementById('enableaccessibility'));
+            });
+        </script>
 
     </body>
 </html>
