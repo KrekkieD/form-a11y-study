@@ -23,8 +23,11 @@ Some wild ideas are scribbled down in `flow.md`. May contain obsolete informatio
 - `tabindex="0"` follows default tab order
 - nested tabindices do not seem to be supported out of the box
 - marking an input with an error using `aria-describedby` gives the user feedback about an error when focusing on a form field (needs some idle time for the screen reader to use this)
-- 
+- marking an input with an error using `aria-labeledby` next to the original label gives the user immediate feedback about an error when focusing on a form field
+
 
 ## Wondering
 
 - Angular Material uses `ng-messages` to implement on the fly error feedback for screen readers, however no notification is given when the field changes from valid to invalid, is this an issue?
+- Angular's `ng-messages` sets `aria-invalid="true"` on fields with `required` even though Mozilla says that shouldn't be done
+until input is dirty
