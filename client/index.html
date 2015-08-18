@@ -12,6 +12,10 @@
 
         <style>
 
+            *:focus {
+                outline: 2px dotted black !important;
+            }
+
             [ng-messages] {
                 color: red;
             }
@@ -27,25 +31,33 @@
                 display: none !important;
             }
 
+            [aria-invalid="true"] {
+                background-color: #ffa0a0;
+            }
+            [aria-invalid="false"] {
+                background-color: #a0ffa0;
+            }
+            [ng-form][tabindex="-1"].ng-invalid {
+                border: 1px solid red;
+            }
+            [tabindex="0"] {
+                outline: 2px dotted #bbbbbb;
+            }
+
         </style>
     </head>
     <body ng-app="test.app">
 
-        <a href="#" id="enableaccessibility" aria-label="Click to improve accessibility for screen readers">
-            <span aria-hidden="true" class="fa fa-wheelchair"></span>
-        </a>
-
-        <strong class="accessibility-content">Accessibility mode enabled</strong>
-
-        <div ng-include="'/overview.html'"></div>
+        <button ng-click="showOverview = !showOverview">Toggle overview</button>
+        <div ng-show="showOverview" ng-include="'/overview.html'"></div>
 
         <form test-app-form name="formStudy" ng-submit="form.submit(formStudy)" novalidate>
 
             <!-- top errors -->
             <div id="errors" tabindex="-1">
-                <div ng-show="formStudy.$submitted && !formStudy.$valid" style="color: red;">
+                <div ng-if="formStudy.$submitted && !formStudy.$valid" style="color: red;">
 
-                    <div ng-messages="formStudy.$error" aria-live="polite">
+                    <div ng-messages="formStudy.$error" aria-live="assertive">
                         <div ng-message="internalservererror">
                             <span aria-hidden="true" class="fa fa-exclamation-circle"></span>
                             Something went wrong. Please try again or contact the customer service.
@@ -62,17 +74,23 @@
                             </p>
                             <a tabindex="0"
                                 href="#"
-                                ng-click="form.setTabIndex()">
+                                ng-click="form.toggleTabIndex()">
 
-                                Click to focus on errors
+                                <span ng-show="!form.tabIndexOn">Click to focus on errors only</span>
+                                <span ng-show="form.tabIndexOn">Click to restore focus to all fields</span>
+
                             </a>
+                            <p aria-live="polite" id="errorfocusenabled">
+                                <span ng-if="form.tabIndexOn === true">To cancel error focus, press escape</span>
+                                <span ng-if="form.tabIndexOn === false">Form field focus restored</span>
+                            </p>
                         </div>
                     </div>
 
                 </div>
             </div>
 
-            <fieldset>
+            <fieldset ng-form="basic">
                 <legend>Basic fields</legend>
 
                 <div>
@@ -88,8 +106,8 @@
                         aria-labeledby="emailLabel emailErrorLabel">
 
 
-                    <div ng-show="formStudy.$submitted || formStudy.email.$dirty"
-                        ng-messages="formStudy.email.$error"
+                    <div ng-if="formStudy.$submitted || formStudy.basic.email.$dirty"
+                        ng-messages="formStudy.basic.email.$error"
                         id="emailErrorLabel"
                         aria-live="assertive">
 
@@ -112,8 +130,8 @@
                         tabindex="0"
                         aria-labeledby="passwordLabel passwordErrorLabel">
 
-                    <div ng-show="formStudy.$submitted || formStudy.password.$dirty"
-                        ng-messages="formStudy.password.$error"
+                    <div ng-if="formStudy.$submitted || formStudy.basic.password.$dirty"
+                        ng-messages="formStudy.basic.password.$error"
                         id="passwordErrorLabel"
                         aria-live="assertive">
 
@@ -124,11 +142,12 @@
                 </div>
 
             </fieldset>
-            <fieldset ng-form="phone">
+            <fieldset ng-form="phone" tabindex="-1">
                 <legend>Phone details</legend>
 
-                <div tabindex="-1"
-                    ng-if="formStudy.$submitted && !formStudy.phone.$valid" style="color: red;"
+                <div ng-if="formStudy.$submitted && !formStudy.phone.$valid"
+                    id="phoneFormErrors"
+                    style="color: red;"
                     ng-messages="formStudy.phone.$error">
 
                     <p ng-message="phonenotrecognized">
@@ -138,7 +157,7 @@
                 </div>
 
                 <div>
-                    <label id="phoneCountryLabel">country prefix</label>
+                    <label id="phoneCountryLabel" aria-hidden="true">country prefix</label>
                     <input type="text"
                         ng-pattern="/[0-9]+/"
                         required
@@ -148,7 +167,7 @@
                         tabindex="0"
                         aria-labeledby="phoneCountryLabel phoneCountryErrorLabel">
 
-                    <div ng-show="formStudy.$submitted || formStudy.phone.phonePrefix.$dirty"
+                    <div ng-if="formStudy.$submitted || formStudy.phone.phonePrefix.$dirty"
                         ng-messages="formStudy.phone.phonePrefix.$error"
                         id="phoneCountryErrorLabel"
                         aria-live="assertive">
@@ -160,7 +179,7 @@
 
 
                 <div>
-                    <label id="phoneNumberLabel">number</label>
+                    <label id="phoneNumberLabel" aria-hidden="true">number</label>
                     <input type="text"
                         ng-pattern="/[0-9]+/"
                         required
@@ -170,7 +189,7 @@
                         tabindex="0"
                         aria-labeledby="phoneNumberLabel phoneNumberErrorLabel">
 
-                    <div ng-show="formStudy.$submitted || formStudy.phone.phoneNumber.$dirty"
+                    <div ng-if="formStudy.$submitted || formStudy.phone.phoneNumber.$dirty"
                         ng-messages="formStudy.phone.phoneNumber.$error"
                         id="phoneNumberErrorLabel"
                         aria-live="assertive">
@@ -182,11 +201,10 @@
 
 
             </fieldset>
-            <fieldset ng-form="address">
+            <fieldset ng-form="address" tabindex="-1">
                 <legend>Address details</legend>
 
-                <div tabindex="-1"
-                    ng-if="formStudy.$submitted && !formStudy.address.$valid" style="color: red;"
+                <div ng-if="formStudy.$submitted && !formStudy.address.$valid" style="color: red;"
                     ng-messages="formStudy.address.$error">
 
                     <p ng-message="addressnotrecognized">
@@ -207,7 +225,7 @@
                         tabindex="0"
                         aria-labeledby="addressCountryCodeLabel addressCountryCodeErrorLabel">
 
-                    <div ng-show="formStudy.$submitted || formStudy.address.addressCountryCode.$dirty"
+                    <div ng-if="formStudy.$submitted || formStudy.address.addressCountryCode.$dirty"
                         ng-messages="formStudy.address.addressCountryCode.$error"
                         id="addressCountryCodeErrorLabel"
                         aria-live="assertive">
@@ -227,7 +245,7 @@
                         tabindex="0"
                         aria-labeledby="addressStreetLabel addressStreetErrorLabel">
 
-                    <div ng-show="formStudy.$submitted || formStudy.address.addressStreet.$dirty"
+                    <div ng-if="formStudy.$submitted || formStudy.address.addressStreet.$dirty"
                         ng-messages="formStudy.address.addressStreet.$error"
                         id="addressStreetErrorLabel"
                         aria-live="assertive">
@@ -246,7 +264,7 @@
                         tabindex="0"
                         aria-labeledby="addressCityLabel addressCityErrorLabel">
 
-                    <div ng-show="formStudy.$submitted || formStudy.address.addressCity.$dirty"
+                    <div ng-if="formStudy.$submitted || formStudy.address.addressCity.$dirty"
                         ng-messages="formStudy.address.addressCity.$error"
                         id="addressCityErrorLabel"
                         aria-live="assertive">
@@ -256,7 +274,7 @@
                 </div>
 
             </fieldset>
-            <fieldset>
+            <fieldset ng-form="backendErrors">
                 <legend>Trigger backend errors</legend>
 
                 <ul>
@@ -292,22 +310,15 @@
                     </li>
                 </ul>
 
-                <div>
-                    <input tabindex="0" type="submit" value="submit">
-                </div>
-
             </fieldset>
+
+            <div>
+                <input tabindex="0" type="submit" value="submit">
+            </div>
 
         </form>
 
         <pre>Preview of model obj:<br>{{ form.model | json:4 }}</pre>
-
-        <script>
-            document.getElementById('enableaccessibility').addEventListener('click', function () {
-                document.querySelector('body').className = document.querySelector('body').className + ' accessibility-enabled';
-                document.getElementById('enableaccessibility').parentNode.removeChild(document.getElementById('enableaccessibility'));
-            });
-        </script>
 
     </body>
 </html>
