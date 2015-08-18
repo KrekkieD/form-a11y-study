@@ -1,0 +1,5 @@
+---
+applications:
+- name: forms-a11y
+  command: node server/server.js
+  memory: 64M
