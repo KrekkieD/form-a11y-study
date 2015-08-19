@@ -25,16 +25,22 @@
                 self.submit = submit;
                 self.toggleTabIndex = toggleTabIndex;
 
+                /**
+                 * Implementation specific function! expects formController
+                 * @param form formController
+                 */
                 function submit (form) {
 
+                    // block overlapping form submissions
                     if (submitting) { return; }
 
+                    // reset tabIndex when doing a submit
                     if (self.tabIndexOn === true) {
                         toggleTabIndex(true);
                     }
 
                     // quick patch for angular 1.2
-                    // todo: properly fix this without changing the formController native properties
+                    // todo: properly fix this without changing the formController's native properties
                     form.$submitted = true;
 
                     // first reset all non-blocking errors to valid
@@ -58,8 +64,10 @@
                             validityWatchers.pop()();
                         }
 
+                        // use a timeout to simulate an $http call
                         $timeout(function () {
 
+                            // create error object in model if absent, allows for easier if-ing
                             self.model.error = self.model.error || {};
 
                             if (self.model.error.internalservererror) {
@@ -97,9 +105,9 @@
                             }
 
                             if (form.$valid === false) {
-                                $timeout(function () {
+                                //$timeout(function () {
                                     document.getElementById('errors').focus();
-                                });
+                                //});
                             }
 
 

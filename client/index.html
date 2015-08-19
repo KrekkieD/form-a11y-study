@@ -121,8 +121,8 @@
     </head>
     <body ng-app="test.app">
 
-        <!--<button ng-click="showOverview = !showOverview">Toggle overview</button>-->
-        <!--<div ng-show="showOverview" ng-include="'/overview.html'"></div>-->
+        <button ng-click="showOverview = !showOverview">Toggle overview</button>
+        <div ng-show="showOverview" ng-include="'/overview.html'"></div>
 
         <form test-app-form name="formStudy" ng-submit="form.submit(formStudy)" novalidate>
 
@@ -170,7 +170,7 @@
 
                     <label id="emailLabel">email</label>
                     <input type="email"
-                        ng-required="!!form.model.email"
+                        required
                         name="email"
                         emailinuse
                         ng-model="form.model.email"
