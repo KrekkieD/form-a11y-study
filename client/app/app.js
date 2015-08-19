@@ -123,7 +123,6 @@
                     if (reset || self.tabIndexOn) {
                         restoreTabIndex($element[0]);
                         _removeEventListener($element[0], 'keydown', _keyListener, false);
-                        console.log(reset);
                         self.tabIndexOn = reset ? undefined : false;
                     }
                     else {
