@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('test.app', ['ngMaterial', 'ngMessages']);
+    angular.module('test.app', ['ngMessages', 'ngAria']);
 
     angular.module('test.app')
         .directive('testAppForm', function () {
@@ -32,6 +32,10 @@
                     if (self.tabIndexOn === true) {
                         toggleTabIndex(true);
                     }
+
+                    // quick patch for angular 1.2
+                    // todo: properly fix this without changing the formController native properties
+                    form.$submitted = true;
 
                     // first reset all non-blocking errors to valid
                     form.$setValidity('internalservererror', true);
@@ -110,14 +114,36 @@
                 function toggleTabIndex (reset) {
 
                     if (reset || self.tabIndexOn) {
-                        restoreTabIndex();
-                        $element[0].removeEventListener('keydown', _keyListener, false);
+                        restoreTabIndex($element[0]);
+                        _removeEventListener($element[0], 'keydown', _keyListener, false);
                         self.tabIndexOn = reset ? undefined : false;
                     }
                     else {
-                        setTabIndex();
-                        $element[0].addEventListener('keydown', _keyListener, false);
+                        setTabIndex($element[0]);
+                        _addEventListener($element[0], 'keydown', _keyListener, false);
                         self.tabIndexOn = true;
+                    }
+
+                }
+
+                function _addEventListener (el, eventName, fn, phase) {
+
+                    if (el.addEventListener) {
+                        el.addEventListener(eventName, fn, !!phase);
+                    }
+                    else {
+                        el.attachEvent('on' + eventName, fn);
+                    }
+
+                }
+
+                function _removeEventListener (el, eventName, fn, phase) {
+
+                    if (el.removeEventListener) {
+                        el.removeEventListener(eventName, fn, !!phase);
+                    }
+                    else {
+                        el.detachEvent('on' + eventName, fn);
                     }
 
                 }
@@ -130,24 +156,23 @@
 
                 }
 
-                function setTabIndex () {
+                function setTabIndex (rootElement) {
 
                     // basic logic:
                     // - any invalid form's directly descending inputs having aria-invalid will get tab indices
                     // - any invalid form without inputs having aria-invalid but with an error showing will get tab indices on all inputs
 
                     // find all elements marked with aria-invalid
-                    var inputElementsArray = _query('[aria-invalid]', $element[0]);
+                    var inputElementsArray = _query('[aria-invalid]', rootElement);
 
                     // set tabindex to -1 on all inputs to create a base starting point
                     _setTabIndex(inputElementsArray, '-1');
 
                     // get all invalid forms and force to array
-                    var formElements = _query('[ng-form].ng-invalid', $element[0]);
+                    var formElements = _query('[ng-form].ng-invalid', rootElement);
 
                     // add the current form to it
-                    formElements.unshift($element[0]);
-
+                    formElements.unshift(rootElement);
 
                     // keep track of the first element that will need to be focused on.
                     // - this should not be the parent form itself, we're already focused on one of its child nodes
@@ -218,6 +243,7 @@
 
                     }
 
+
                     if (firstElement) {
                         // this should always be present really..
                         // set focus on first element with tabindex
@@ -246,7 +272,14 @@
 
                     parent = parent || document;
 
-                    return Array.prototype.slice.call(parent.querySelectorAll(cssQuery));
+                    var staticNodeList = parent.querySelectorAll(cssQuery);
+
+                    // parse to array in a way that also works in IE8
+                    var arr = [];
+                    for (var i = 0, iMax = staticNodeList.length; i < iMax; i++) {
+                        arr.push(staticNodeList[i]);
+                    }
+                    return arr;
 
                 }
 
@@ -292,9 +325,9 @@
 
                 }
 
-                function restoreTabIndex () {
+                function restoreTabIndex (rootElement) {
 
-                    var adjustedInputs = _query('[data-previous-tabindex]', $element[0]);
+                    var adjustedInputs = _query('[data-previous-tabindex]', rootElement);
 
                     for (var i = 0, iMax = adjustedInputs.length; i < iMax; i++) {
                         adjustedInputs[i].setAttribute('tabindex', adjustedInputs[i].getAttribute('data-previous-tabindex'));

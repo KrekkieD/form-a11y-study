@@ -14,7 +14,7 @@
     "tests"
   ],
   "dependencies": {
-    "angularjs": "1.4",
+    "angularjs": "~1.2",
     "angular-material": "~0.10.1",
     "angular-messages": "~1.4.4"
   }

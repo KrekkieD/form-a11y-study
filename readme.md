@@ -25,7 +25,12 @@ Some wild ideas are scribbled down in `flow.md`. May contain obsolete informatio
 - marking an input with an error using `aria-describedby` gives the user feedback about an error when focusing on a form field (needs some idle time for the screen reader to use this)
 - marking an input with an error using `aria-labeledby` next to the original label gives the user immediate feedback about an error when focusing on a form field
 
-
+- Angular things
+    - ng-messages works on angular 1.2 but is broken in IE8. Polyfilling `Array.indexOf` seems to fix this.
+    - ng-aria works on angular 1.2 if the `required` parser is fixed, currently checks for `ngModel.$validators.required` 
+    which is angular 1.3+, errors on absence of `ngModel.$validators`. When patched to look for attributes `required` and `ng-required` instead, 
+    it appears to be ok for IE8 as well.
+    
 ## Wondering
 
 - Angular Material uses `ng-messages` to implement on the fly error feedback for screen readers, however no notification is given when the field changes from valid to invalid, is this an issue?
