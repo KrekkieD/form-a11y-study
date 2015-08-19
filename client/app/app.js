@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('test.app', ['ngMessages', 'ngAria']);
+    angular.module('test.app', ['ngMessages', 'klmAria']);
 
     angular.module('test.app')
         .directive('testAppForm', function () {
@@ -178,14 +178,14 @@
                     // set tabindex to -1 on all inputs to create a base starting point
                     _setTabIndex(inputElementsArray, '-1');
 
-                    // get all invalid forms and force to array
+                    // get all invalid forms
                     var formElements = _query('[ng-form].ng-invalid', rootElement);
 
-                    // add the current form to it
+                    // add the rootElement to it
                     formElements.unshift(rootElement);
 
                     // keep track of the first element that will need to be focused on.
-                    // - this should not be the parent form itself, we're already focused on one of its child nodes
+                    // - this should not be the parent form itself, we're already focused on one of its child nodes (error box)
                     // - this could be an [ng-form] if it has tabindex and no inputs marked aria-invalid="true"
                     var firstElement;
 
@@ -200,10 +200,10 @@
                         // collection of aria-invalid="true" inputs
                         var invalidInputsArray = [];
 
-                        // collection of not aria-invalid="true" inputs
+                        // collection of !aria-invalid="true" inputs (most likely aria-invalid="false", but who knows)
                         var validInputsArray = [];
 
-                        // sort the inputs based on aria-invalid value
+                        // sort (as in group) the inputs based on aria-invalid value
                         for (var j = 0, jMax = formInputsArray.length; j < jMax; j++) {
 
                             if (formInputsArray[j].getAttribute('aria-invalid') === 'true') {
@@ -216,35 +216,37 @@
                         }
 
                         if (invalidInputsArray.length) {
-                            // form has invalid inputs
 
+                            // form has invalid inputs
                             firstElement = firstElement || invalidInputsArray[0];
 
-                            // reset tabindex for invalid inputs
+                            // reset tabindex to 0 for invalid inputs, they must be focusable
                             _setTabIndex(invalidInputsArray, '0');
 
                         }
                         else {
                             // form does not have invalid inputs
 
-                            // does form have invalid ng-forms? we then assume this parent form is fine, since no invalid inputs
-                            // todo: this may need finetuning but increases complexity
+                            // does this form contain an element [ng-messages] that is not in a nested form?
+                            // - we then assume this form is showing errors and should be able to receive focus
+                            // - otherwise it should have a nested form that is invalid. Not checking that though.
 
                             // get all form error messages
                             var formErrorMessages = _query('[ng-messages]', formElements[i]);
 
-                            // make sure they're not from nested forms
+                            // and remove any [ng-messages] that are in nested forms
                             _scopeFormElements(formErrorMessages, formElements[i]);
 
+                            // any elements left?
                             if (formErrorMessages.length) {
 
-                                // form itself may need to receive focus if it has a tabindex
+                                // form itself may need to receive focus if it has a tabindex defined (= custom user implementation)
                                 if (formElements[i].getAttribute('tabindex') !== null) {
                                     _setTabIndex(formElements[i], '0');
                                     firstElement = firstElement || formElements[i];
                                 }
 
-                                // all these form inputs should receive a tab index
+                                // all these form inputs should receive a tabindex to allow focus, as something needs correcting
                                 _setTabIndex(validInputsArray, '0');
 
                             }
@@ -253,9 +255,8 @@
 
                     }
 
-
+                    // this element should always be set really..
                     if (firstElement) {
-                        // this should always be present really..
                         // set focus on first element with tabindex
                         firstElement.focus();
                     }
@@ -282,11 +283,12 @@
 
                 function _query(cssQuery, parent) {
 
+                    // query the DOM starting from document, or parent if provided
                     parent = parent || document;
 
                     var staticNodeList = parent.querySelectorAll(cssQuery);
 
-                    // parse to array in a way that also works in IE8
+                    // parse nodeList to array in a way that also works in IE8
                     var arr = [];
                     for (var i = 0, iMax = staticNodeList.length; i < iMax; i++) {
                         arr.push(staticNodeList[i]);
@@ -295,6 +297,16 @@
 
                 }
 
+                /**
+                 * This funky function filters an array of elements by confirming each element
+                 * is a descendant of the formElement (parent) with no '[ng-form],[data-ng-form]' in between.
+                 *
+                 * TODO: the 'between'-selector may need to be configurable
+                 *
+                 * @param sourceList Array Array of element nodes
+                 * @param formElement Element Parent of the elements
+                 * @private
+                 */
                 function _scopeFormElements (sourceList, formElement) {
 
                     var newSourceList = [];

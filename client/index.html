@@ -1,22 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head>
-
-
-        <!--[if IE 8]>
         <!-- Here be IE8 polyfills -->
+        <!--[if IE 8]>
         <script src="/app/ie8polyfill.js"></script>
         <![endif]-->
 
-        <script src="/static/angularjs/angular.js"></script>
-        <!--<script src="/static/angular/angular.js"></script>-->
-        <!--<script src="/static/angular-material/angular-material.js"></script>-->
-        <script src="/static/angular-aria/angular-aria.js"></script>
-        <!--<script src="/static/angular-animate/angular-animate.js"></script>-->
-        <script src="/static/angular-messages/angular-messages.js"></script>
-        <script src="/app/app.js"></script>
+        <!-- http://cdnjs.com/libraries/angular.js/ <- available angular versions -->
+        <script src="%ANGULAR_CDN_URL%"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.4/angular-messages.min.js"></script>
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+        <script src="/app/app.js"></script>
+        <script src="/app/klm-aria.js"></script>
+
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="/app/style.css">
     </head>
     <body ng-app="test.app">
