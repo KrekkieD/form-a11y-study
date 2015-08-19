@@ -1,0 +1,35 @@
+/* rudimentary style for easier view */
+label {
+    display: inline-block;
+    min-width: 150px;
+}
+
+fieldset > div {
+    padding: .5em;
+}
+
+
+/* helper style for showing current focus */
+*:focus {
+    outline: 2px dotted black !important;
+}
+
+/* carelessly color errors red */
+[ng-messages] {
+    color: red;
+}
+
+/* show state of aria-invalid through background colors */
+[aria-invalid="true"] {
+    background-color: #ffa0a0;
+}
+
+[aria-invalid="false"] {
+    background-color: #a0ffa0;
+}
+
+
+/* mark all elements that can be tabbed to */
+[tabindex="0"] {
+    outline: 2px dotted #bbbbbb;
+}

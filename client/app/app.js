@@ -39,7 +39,7 @@
                         toggleTabIndex(true);
                     }
 
-                    // quick patch for angular 1.2
+                    // quick patch for angular 1.2 which does not have $submitted
                     // todo: properly fix this without changing the formController's native properties
                     form.$submitted = true;
 
@@ -50,10 +50,9 @@
                     form.address.$setValidity('addressnotrecognized', true);
 
 
+                    // form marked as invalid, not gonna submit to backend, focus on error element
                     if (!form.$valid) {
-
                         document.getElementById('errors').focus();
-
                     }
                     else {
 
@@ -79,38 +78,38 @@
                             else {
                                 if (self.model.error.emailinuse) {
 
+                                    // mark the email field as being invalid
                                     form.basic.email.$setValidity('emailinuse', false);
-                                    var invalidEmailValue = self.model.email;
 
+                                    // create a watcher to add/remove the error if the value entered equals the
+                                    // value we just denied in the backend (in other words: requires value change)
+                                    var invalidEmailValue = self.model.email;
                                     validityWatchers.push($scope.$watch('form.model.email', function (newEmailValue) {
-                                        if (invalidEmailValue === newEmailValue) {
-                                            form.basic.email.$setValidity('emailinuse', false);
-                                        }
-                                        else {
-                                            form.basic.email.$setValidity('emailinuse', true);
-                                        }
+                                        form.basic.email.$setValidity('emailinuse', invalidEmailValue !== newEmailValue);
                                     }));
 
                                 }
                                 if (self.model.error.phonenotrecognized) {
-
+                                    // form error, non-blocking so no watchers
                                     form.phone.$setValidity('phonenotrecognized', false);
-
                                 }
                                 if (self.model.error.addressnotrecognized) {
-
+                                    // form error, non-blocking so no watchers
                                     form.address.$setValidity('addressnotrecognized', false);
-
                                 }
+
                             }
 
+                            // did we flag the form as invalid based on the 'backend response'?
                             if (form.$valid === false) {
-                                //$timeout(function () {
+                                // without the timeout wrapper the screen reader would not find content when focusing,
+                                // so skip a $digest to allow element rendering and then focus on the field
+                                $timeout(function () {
                                     document.getElementById('errors').focus();
-                                //});
+                                });
                             }
 
-
+                            // unflag form as submitting so it can be submitted again
                             submitting = false;
 
                         }, 1500);
@@ -124,6 +123,7 @@
                     if (reset || self.tabIndexOn) {
                         restoreTabIndex($element[0]);
                         _removeEventListener($element[0], 'keydown', _keyListener, false);
+                        console.log(reset);
                         self.tabIndexOn = reset ? undefined : false;
                     }
                     else {
@@ -159,7 +159,10 @@
                 function _keyListener (e) {
 
                     if (e.keyCode === 27) {
-                        $scope.$apply(toggleTabIndex);
+                        // wrapped in a function, apparently $apply provides an object as arg
+                        $scope.$apply(function () {
+                            toggleTabIndex();
+                        });
                     }
 
                 }
@@ -262,7 +265,9 @@
 
                 function _setTabIndex (el, tabIndex) {
 
-                    if (Array.isArray(el)) {
+                    var _isArray = Array.isArray || function(arg) { return Object.prototype.toString.call(arg) === '[object Array]'; };
+
+                    if (_isArray(el)) {
                         for (var i = 0, iMax = el.length; i < iMax; i++) {
                             _setTabIndex(el[i], tabIndex);
                         }
